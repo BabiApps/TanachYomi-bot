@@ -24,10 +24,6 @@ echo "📦 Installing Node.js..."
 curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
-# Install npm
-echo "📦 Installing npm..."
-sudo apt install -y npm
-
 # Install PM2 globally for process management
 echo "📦 Installing PM2..."
 npm install -g pm2
