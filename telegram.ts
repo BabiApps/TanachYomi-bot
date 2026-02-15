@@ -163,6 +163,7 @@ export default class TelegramClient {
                 chat_id: String(chatId),
                 audio: audioParam,
                 title: episode.name,
+                caption: episode.name,
                 reply_markup: {
                     inline_keyboard: [[
                         { text: "SoundCloud", url: episode.soundcloud },
