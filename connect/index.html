@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="he">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>בוט התנ"ך היומי</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e5ddd5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            padding: 32px;
+            text-align: center;
+            width: 400px;
+        }
+
+        h1 {
+            color: #075e54;
+            margin-bottom: 20px;
+        }
+
+        .status {
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .connected {
+            color: green;
+        }
+
+        .disconnected {
+            color: red;
+        }
+
+        img {
+            margin-top: 20px;
+            width: 250px;
+            height: 250px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.0/build/qrcode.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>בוט התנ"ך היומי</h1>
+        <div id="content">
+            <p class="status disconnected">טוען סטטוס...</p>
+        </div>
+    </div>
+
+    <script>
+        async function updateStatus() {
+            try {
+                const res = await fetch("/status");
+                const data = await res.json();
+                const contentDiv = document.getElementById("content");
+
+                if (data.connected) {
+                    contentDiv.innerHTML = `<p class="status connected">✅ הבוט מחובר לחשבון</p>`;
+                } else if (data.qr) {
+                    QRCode.toDataURL(data.qr, { type: 'utf8' }, function (err, str) {
+                        contentDiv.innerHTML = `
+                        <p class="status disconnected">❌ הבוט לא מחובר<br/>סרוק את הקוד כדי להתחבר:</p>
+                        <img src="${str}" alt="QR Code"/>
+                      `;
+                    })
+                } else {
+                    contentDiv.innerHTML = `<p class="status disconnected">ממתין ל־QR...</p>`;
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        setInterval(updateStatus, 3000);
+        updateStatus();
+    </script>
+</body>
+
+</html>

@@ -5,3 +5,8 @@ files
 db.sqlite
 dist/
 *.log
+# Dynamic state files - auto-generated on first run
+saved_files/ADMINS_Tanach.json
+saved_files/LIST_OF_GROUP.json
+saved_files/BIBLE_PROGRESS.json
+saved_files/BIBLE_EPISODES.json

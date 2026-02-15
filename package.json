@@ -1,24 +1,43 @@
 {
   "name": "tanachyomi",
-  "version": "1.0.1",
+  "version": "1.1.0",
+  "type": "module",
   "description": "send podcast every day",
   "main": "TanachYomiBot.js",
   "scripts": {
-    "start": "node TanachYomiBot.js",
-    "test": "node TanachYomiBot.js test"
+    "start": "node --loader ts-node/esm index.ts",
+    "build": "tsc -p tsconfig.json",
+    "dev": "node --loader ts-node/esm index.ts",
+    "test": "node --loader ts-node/esm index.ts test"
   },
   "author": "Shilo Babila",
   "license": "ISC",
   "dependencies": {
-    "whatsapp-web.js": "^1.17.1",
+    "@adiwajshing/baileys": "github:WhiskeySockets/Baileys",
+    "@adiwajshing/keyed-db": "^0.2.4",
+    "@hebcal/core": "^6.0.6",
+    "baileys-bottle-devstroupe": "github:BabiApps/baileys-bottle-devstroupe",
+    "dotenv": "^16.0.1",
+    "express": "^5.2.1",
     "hebcal": "^2.3.2",
-    "node-telegram-bot-api":"^0.58.0",
-    "qrcode-terminal": "^0.12.0",
-    "qrcode":"^1.5.1",
-    "soundcloud-scraper":"^5.0.3",
+    "link-preview-js": "^3.2.0",
     "node-id3": "^0.2.3",
-    "p-queue": "6.6.2",
-    "dotenv":"^16.0.1",
-    "pm2":"^5.2.0"
+    "node-telegram-bot-api": "^0.66.0",
+    "p-queue": "^9.0.1",
+    "pm2": "^5.2.0",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0",
+    "soundcloud-downloader": "^1.0.0",
+    "soundcloud-scraper": "^5.0.3",
+    "sqlite3": "^5.1.7",
+    "typescript-telegram-bot-api": "^0.10.0",
+    "whatsapp-web.js": "^1.17.1",
+    "winston": "^3.18.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/qrcode": "^1.5.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }

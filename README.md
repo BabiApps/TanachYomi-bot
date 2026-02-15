@@ -1,56 +1,98 @@
-[![npm](https://img.shields.io/npm/v/whatsapp-web.js.svg)](https://www.npmjs.com/package/whatsapp-web.js)
-
 # Tanach Yomi Bot
-A WhatsApp and Telegram Bots that will send everyday the chapter to learn today
 
-## Installation - not completed
+A WhatsApp and Telegram bot that sends the daily Torah chapter to learn, with search functionality and admin controls.
 
-Node v12+ is required.
+## Features
 
-0. Clone this project or download it and unzip it.
-1. Inside the folder run the command `npm install`
-2. To start the Bot, just type `npm start`
+- **Daily Distribution**: Automatically sends the daily chapter from Tanach at scheduled times
+- **Multiple Platforms**: Support for both WhatsApp and Telegram
+- **Search Capability**: Find any chapter by name, book, and chapter
+- **Smart Selection**: Interactive inline keyboard for choosing from search results
+- **Admin Commands**: Manage groups, view logs, and control the bot
+- **Audio & Links**: Direct links to audio and streaming services
+
+## Requirements
+
+- Node.js v16+ (TypeScript support)
+- npm or yarn
+- WhatsApp account (for WhatsApp bot)
+- Telegram Bot Token (get from @BotFather on Telegram)
+
+## Quick Start
+
+### 1. Installation
+
+```bash
+git clone <repository>
+cd TanachYomi-bot
+npm install
+```
+
+### 2. Configuration
+
+Create a `.env` file (copy from `.env.example`):
 
 ```
-npm install --save hebcal
-npm install --save whatsapp-web.js
-npm install --save node-telegram-bot-api
-npm install --save qrcode-terminal
-npm install --save qrcode
-npm install --save soundcloud-scraper
-npm install --save node-id3
+TELEGRAM_BOT_TOKEN=your_token_here
+DEBUG_USER_ID=your_telegram_id
 ```
 
-## Define the Bot
+Update `config.js` with your settings:
+- Admin user IDs
+- Default groups
+- Bot metadata
 
-add your info inside the bot code (default groups and user to debug)
+### 3. Run the Bot
 
-
-## Commands
-- `!ping` - check if the bot is alive.
-- 
-
-## Deploy on server
-
-for running the bot 24/7, it recommended to deploy it on server.
-you can use AWS, Heroku, Orcale Esc.
-(or bought Reseberry PI)
-
+```bash
+npm start
 ```
+
+For WhatsApp: Scan the QR code with your phone.
+
+For Telegram: The bot will start listening immediately.
+
+## Development
+
+Build TypeScript:
+```bash
+npm run build
+```
+
+This generates JavaScript files in the working directory.
+
+## Deployment
+
+For 24/7 operation on a Linux server:
+
+```bash
 sudo apt-get update
-sudo apt install nodejs
-sudo apt install npm
+sudo apt install nodejs npm
 
-sudo apt-get install -y libgbm-dev
-sudo apt install libxkbcommon-x11-0
-sudo apt-get install libxcomposite-dev
-sudo apt-get install libxdamage1
-sudo apt-get install libxrandr2
-sudo apt-get install libasound2
+# Install pm2 for process management
+sudo npm install -g pm2
+
+# Start bot with pm2
+pm2 start index.js --name tanach
+
+# Make pm2 start on boot
+pm2 startup
+pm2 save
 ```
-use pm2 or tmux for keeping the session alive.
 
-## Thanks
+Or use Docker, Heroku, AWS, etc.
 
-- [whatsapp-web.js](https://github.com/pedroslopez/whatsapp-web.js)
-- [telegram](https://github.com/)
+## Troubleshooting
+
+**Bot doesn't start**: Check `.env` file and Telegram token
+**Search not working**: Verify `saved_files/BIBLE_EPISODES.json` exists
+**WhatsApp not connecting**: Scan QR code, ensure device stays online
+**Permission issues**: Check admin IDs in `config.js`
+
+## Contributing
+
+Feel free to submit issues and enhancement requests.
+
+## License
+
+MIT - See LICENSE file for details
