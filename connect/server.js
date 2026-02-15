@@ -1,8 +1,10 @@
 import express from 'express';
 import WhatsAppClient from '../baileys.js';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { startTunnel } from './tunnel.js';
+import { config } from '../config.js';
 
 const app = express();
 
@@ -17,8 +19,23 @@ app.get("/status", (req, res) => {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Resolve index.html path so it works both in source and when running from dist
+function resolveConnectIndex() {
+    const candidates = [
+        path.join(__dirname, 'index.html'), // compiled location (dist/connect/index.html)
+        path.join(process.cwd(), 'connect', 'index.html'), // project-root/connect/index.html
+        path.join(config.paths.root, 'connect', 'index.html')
+    ];
+    for (const p of candidates) {
+        try { if (fs.existsSync(p)) return p; } catch (e) {}
+    }
+    return null;
+}
+
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    const indexPath = resolveConnectIndex();
+    if (indexPath) return res.sendFile(indexPath);
+    res.status(404).send('Not Found');
 });
 
 export async function startServer({ port = process.env.PORT || 3000 } = {}) {

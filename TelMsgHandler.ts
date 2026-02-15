@@ -2,6 +2,7 @@ import TelegramClient from "./telegram.js";
 import TanachYomiProcess from "./TanachYomiProcess.js";
 import logger from "./logger.js";
 import fs from "fs";
+import path from 'path';
 import Tools from "./tools.js";
 import { config } from './config.js';
 
@@ -105,8 +106,9 @@ bot.on('message:text', async (msg) => {
             }
 
             try {
-                await fs.promises.access('./logs/combined.log', fs.constants.R_OK);
-                await telegramClient.sendDocument(chatId, './logs/combined.log');
+                const logPath = `${config.paths.logs}${path.sep}combined.log`;
+                await fs.promises.access(logPath, fs.constants.R_OK);
+                await telegramClient.sendDocument(chatId, logPath);
             } catch (err) {
                 logger.error(`Failed to send log file: ${err}`);
             }
@@ -124,7 +126,8 @@ bot.on('message:text', async (msg) => {
             }
 
 
-            fs.createWriteStream('./logs/combined.log', { flags: 'w' });
+            const logPath = `${config.paths.logs}${path.sep}combined.log`;
+            fs.createWriteStream(logPath, { flags: 'w' });
             logger.info(`Admin ${adminName} has cleared the log at ${Tools.getIsraeliDate()}`);
             await telegramClient.sendMessage(chatId, "הלוג נוקה");
             return;

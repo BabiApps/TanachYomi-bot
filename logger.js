@@ -1,10 +1,17 @@
 import winston from 'winston';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { config } from './config.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Ensure logs directory exists (use absolute path from config)
+try {
+    if (!fs.existsSync(config.paths.logs)) {
+        fs.mkdirSync(config.paths.logs, { recursive: true });
+    }
+} catch (e) {
+    // ignore
+}
 
 const logger = winston.createLogger({
     level: 'info',
@@ -19,18 +26,18 @@ const logger = winston.createLogger({
     defaultMeta: { service: 'TanachYomi' },
     transports: [
         new winston.transports.File({
-            filename: path.join(__dirname, 'logs', 'error.log'),
+            filename: path.join(config.paths.logs, 'error.log'),
             level: 'error',
             maxsize: 5242880, // 5MB
             maxFiles: 5,
         }),
         new winston.transports.File({
-            filename: path.join(__dirname, 'logs', 'combined.log'),
+            filename: path.join(config.paths.logs, 'combined.log'),
             maxsize: 5242880, // 5MB
             maxFiles: 5,
         }),
         new winston.transports.File({
-            filename: path.join(__dirname, 'logs', 'debug.log'),
+            filename: path.join(config.paths.logs, 'debug.log'),
             level: 'debug', 
             maxsize: 5242880, // 5MB
             maxFiles: 5,
