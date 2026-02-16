@@ -1,4 +1,4 @@
-import { Client } from 'soundcloud-scraper';
+import scdl from 'soundcloud-downloader';
 import * as fs from 'fs';
 import path from 'path';
 import type { TanachYomiEpisode } from './TanachYomiProcess.js';
@@ -25,8 +25,6 @@ class Downloader {
             return episode.path;
         }
 
-        const client: Client = new Client();
-
         // Extract sefer from episode name more safely
         // Format is usually "ספר_פרק #" e.g. "בראשית פרק 1"
         const nameParts = episode.name?.split(' ') || [];
@@ -47,55 +45,45 @@ class Downloader {
 
         // download from soundcloud
         logger.info(`[Downloader] Downloading episode "${episode.name}" from SoundCloud...`);
-        
-        const info = await client.getSongInfo(Tools.cleanUrlParameters(episode.soundcloud), { fetchStreamURL: true });
-        const streamURL = info.streamURL;
 
-        const response = await fetch(streamURL);
-        const fileStream = fs.createWriteStream(filePath);
+        try {
+            const cleanUrl = Tools.cleanUrlParameters(episode.soundcloud);
+            const stream = await scdl.default.downloadFormat(cleanUrl, scdl.default.FORMATS.MP3);
+            const fileStream = fs.createWriteStream(filePath);
 
-        await new Promise<void>(async (resolve, reject) => {
-            const body = response.body;
-            if (!body) {
-                return reject(new Error('No response body'));
-            }
+            await new Promise<void>((resolve, reject) => {
+                stream.pipe(fileStream);
 
-            try {
-                const reader = (body as any).getReader();
-                try {
-                    while (true) {
-                        const { done, value } = await reader.read();
-                        if (done) break;
-                        fileStream.write(Buffer.from(value as Uint8Array));
-                    }
-                    fileStream.end();
-                } finally {
-                    // release the reader's lock if supported
-                    if (typeof reader.releaseLock === 'function') {
-                        try { reader.releaseLock(); } catch { /* ignore */ }
-                    }
-                }
-
-                fileStream.on("finish", () => {
+                fileStream.on('finish', () => {
                     NodeID3.write({
                         title: episode.name,
                         artist: "הרב מוטי פרנקו (ישיבת הגולן)"
                     }, filePath);
-
                     resolve();
                 });
-                fileStream.on("error", (err) => {
-                    reject(err);
-                });
-            } catch (err) {
-                reject(err);
-            }
-        });
 
-        logger.info(`[Downloader] Finished downloading episode "${episode.name}" to ${filePath}`);
-        TanachYomiProcess.getInstance().updateEpisodePath(episode, filePath);
-        return filePath;
+                stream.on('error', (err) => {
+                    reject(new Error(`Stream error: ${err.message}`));
+                });
+
+                fileStream.on('error', (err) => {
+                    reject(new Error(`File write error: ${err.message}`));
+                });
+            });
+
+            logger.info(`[Downloader] Finished downloading episode "${episode.name}" to ${filePath}`);
+            TanachYomiProcess.getInstance().updateEpisodePath(episode, filePath);
+            return filePath;
+
+        } catch (error) {
+            // delete file if partially downloaded
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+            throw error;
+        }
     }
 }
+
 export default Downloader;
 export { Downloader };
