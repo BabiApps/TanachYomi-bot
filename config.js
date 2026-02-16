@@ -20,6 +20,7 @@ const PROJECT_ROOT = getProjectRoot();
 
 export const config = {
     PRODUCTION: process.env.NODE_ENV === 'production',
+    port: process.env.PORT || 3000,
 
     // Telegram Bot settings
     telegram: {

@@ -1,5 +1,6 @@
 import { spawn } from "child_process";
 import os from "os";
+import { config } from '../config.js';
 
 /**
  * Starts a Cloudflare tunnel and returns an object with the public URL and a stop function
@@ -14,7 +15,7 @@ export function startTunnel() {
                 cloudflaredCmd = "C:\\CloudFlare\\cloudflared-windows-amd64.exe";
             }
 
-            const args = ["tunnel", "--url", "http://localhost:3000", "--protocol", "http2"];
+            const args = ["tunnel", "--url", `http://localhost:${config.port}`, "--protocol", "http2"];
             const processTunnel = spawn(cloudflaredCmd, args, { stdio: ["ignore", "pipe", "pipe"] });
 
             let resolved = false;

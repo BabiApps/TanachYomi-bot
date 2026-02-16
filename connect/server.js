@@ -27,7 +27,7 @@ function resolveConnectIndex() {
         path.join(config.paths.root, 'connect', 'index.html')
     ];
     for (const p of candidates) {
-        try { if (fs.existsSync(p)) return p; } catch (e) {}
+        try { if (fs.existsSync(p)) return p; } catch (e) { }
     }
     return null;
 }
@@ -38,15 +38,15 @@ app.get("/", (req, res) => {
     res.status(404).send('Not Found');
 });
 
-export async function startServer({ port = process.env.PORT || 3000 } = {}) {
-    const server = app.listen(Number(port));
+export async function startServer() {
+    const server = app.listen(Number(config.port));
 
     await new Promise((resolve, reject) => {
         server.on('listening', () => resolve(null));
         server.on('error', (err) => reject(err));
     });
 
-    let url = `http://localhost:${port}`;
+    let url = `http://localhost:${config.port}`;
     let tunnelObj = null;
 
     try {
@@ -59,11 +59,11 @@ export async function startServer({ port = process.env.PORT || 3000 } = {}) {
 
     const stop = async () => {
         if (tunnelObj && typeof tunnelObj.stop === 'function') {
-            try { await tunnelObj.stop(); } catch (e) {}
+            try { await tunnelObj.stop(); } catch (e) { }
         } else if (tunnelObj && tunnelObj.process && typeof tunnelObj.process.kill === 'function') {
-            try { tunnelObj.process.kill(); } catch (e) {}
+            try { tunnelObj.process.kill(); } catch (e) { }
         }
-        try { server.close(); } catch (e) {}
+        try { server.close(); } catch (e) { }
     };
 
     return { url, stop, server, tunnel: tunnelObj };
