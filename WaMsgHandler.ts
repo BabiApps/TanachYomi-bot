@@ -187,7 +187,8 @@ export default async function handleMessage(msg: WAMessage) {
             return await whatsapp.sendMsg(jid, { text: "רק מנהלים יכולים להשתמש בפקודה זו." });
         }
 
-        const name = msg.pushName || "Unknown";
+        const metadata = await whatsapp.getGroupMetadata(jid);
+        const name = metadata?.subject || "Unknown";
 
         const isAdded = TanachYomiProcess.getInstance().addGroup("tanach_whatsapp", name, jid);
 

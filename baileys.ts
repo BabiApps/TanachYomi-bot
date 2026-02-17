@@ -279,6 +279,12 @@ class WhatsAppClient {
     getConnectionStatus(): boolean {
         return this.isConnected;
     }
+
+    getGroupMetadata(jid: string) {
+        if (!this.sock) return null;
+        if (!jid.endsWith('@g.us')) return null; // only for groups
+        return this.sock?.groupMetadata(jid);
+    }
 }
 
 export default WhatsAppClient;
