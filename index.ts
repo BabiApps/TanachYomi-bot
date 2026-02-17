@@ -9,27 +9,21 @@ import { config } from './config.js';
 
 async function startBot() {
     try {
-        logger.info('🚀 מתחיל את TanachYomiBot...');
-
         // Telegram
-        logger.info('📲 מאתחל Telegram...');
         const telegramClient = TelegramClient.getInstance();
-        logger.info('✅ Telegram מוכן');
+        logger.info('✅ Telegram is ready');
 
         // WhatsApp
-        logger.info('📱 מאתחל WhatsApp...');
         const whatsappClient = WhatsAppClient.getInstance();
         await whatsappClient.initialize();
-        logger.info('✅ WhatsApp מוכן');
+        logger.info('✅ WhatsApp is ready');
 
         // TanachYomiProcess
-        logger.info('📖 מאתחל TanachYomiProcess...');
         const tanachProcess = TanachYomiProcess.getInstance();
         await tanachProcess.init();
-        logger.info('✅ TanachYomiProcess מוכן');
+        logger.info('📖 TanachYomiProcess is ready');
 
         // Start local HTTP server + tunnel and announce URL
-        logger.info('🌐 מאתחל Tunnel/Server...');
         const { url: tunnelUrl, stop: stopTunnel } = await startServer();
         logger.info(`🌐 Tunnel available: ${tunnelUrl}`);
         console.info(`Tunnel: ${tunnelUrl}`);
@@ -50,19 +44,23 @@ async function startBot() {
         // ensure tunnel closes on exit
         process.on('SIGINT', async () => {
             logger.info('🛑 SIGINT received, closing tunnel and exiting...');
-            try { await stopTunnel(); } catch {}
+            try { await stopTunnel(); } catch { }
             process.exit(0);
         });
 
-        logger.info('🎯 התחלת main loop...');
-        //await tanachProcess.start();
-        await tanachProcess.startProcessLoop();
+        if (config.PRODUCTION) {
+            logger.info('⚡ Running in PRODUCTION mode - starting episode scheduler');
+            await tanachProcess.start();
+        } else {
+            logger.info('⚡ Running in DEVELOPMENT mode - skipping Zero-Minute, starting episode sending immediately');
+            tanachProcess.startProcessLoop();
+        }
 
-        logger.info('✨ הבוט פועל בהצלחה!');
+        logger.info('✨ TanachYomiBot is up and running!');
         return { whatsappClient, telegramClient, tanachProcess, tunnelUrl, stopTunnel };
 
     } catch (error: any) {
-        logger.error('❌ שגיאה בהתחלה:', {
+        logger.error('❌ Failed to start TanachYomiBot', {
             message: error.message,
             stack: error.stack
         });
@@ -86,16 +84,14 @@ process.on('uncaughtException', (error) => {
     process.exit(1);
 });
 
-// סיכום SessionEntry logs (סתירה פחות רעש)
 const console_info = console.info;
-console.info = (...args) => {
+console.info = (...args: any[]) => {
     const message = args.join(" ");
     return message.includes("SessionEntry")
         ? console_info("Updating SessionEntry", [])
         : console_info(...args);
 };
 
-// התחל את הבוט
 logger.info('='.repeat(50));
 logger.info('TanachYomiBot - Hebrew Bible Daily Podcast');
 logger.info('='.repeat(50));
