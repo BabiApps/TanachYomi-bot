@@ -4,7 +4,6 @@ import { config } from './config.js';
 import { WAMessage } from '@adiwajshing/baileys';
 import Tools from './tools.js';
 import TanachYomiProcess, { TanachYomiEpisode } from './TanachYomiProcess.js';
-import Downloader from './downloader.js';
 
 const OpenedDialogs: Map<string, { codename: string, data: { [key: string]: any } }> = new Map(); // jid -> dialog data
 
@@ -38,12 +37,16 @@ export default async function handleMessage(msg: WAMessage) {
     // ADMIN COMMANDS
     // normalize debug users to whatsapp jids and check membership properly
     const debugJid = Tools.phoneToWhatsApp(config.whatsapp.debug);
-    const IS_ADMIN = debugJid === jid || debugJid === jidAlt ||
+    const IS_ADMIN =
+        debugJid === jid || debugJid === jidAlt ||
+        debugJid === msg.key.participant || debugJid === msg.key.participantAlt ||
         TanachYomiProcess.getInstance().isAdmin(jid) ||
-        TanachYomiProcess.getInstance().isAdmin(jidAlt);
+        TanachYomiProcess.getInstance().isAdmin(jidAlt) ||
+        TanachYomiProcess.getInstance().isAdmin(msg.key.participant) ||
+        TanachYomiProcess.getInstance().isAdmin(msg.key.participantAlt);
 
     // stop/start the daily episode sending
-    if (textMsg.startsWith("!עצור") || textMsg.startsWith("!stop") ) {
+    if (textMsg.startsWith("!עצור") || textMsg.startsWith("!stop")) {
         if (!IS_ADMIN) {
             return await whatsapp.sendMsg(jid, { text: "רק מנהלים יכולים להשתמש בפקודה זו." });
         }
@@ -52,7 +55,7 @@ export default async function handleMessage(msg: WAMessage) {
         return await whatsapp.sendMsg(jid, { text: "שליחת הפרק היומי נעצרה. על מנת להפעיל מחדש יש לשלוח את הפקודה !הפעל." });
     }
 
-    if (textMsg.startsWith("!הפעל") || textMsg.startsWith("!start") ) {
+    if (textMsg.startsWith("!הפעל") || textMsg.startsWith("!start")) {
         if (!IS_ADMIN) {
             return await whatsapp.sendMsg(jid, { text: "רק מנהלים יכולים להשתמש בפקודה זו." });
         }
