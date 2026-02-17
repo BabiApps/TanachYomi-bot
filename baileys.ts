@@ -25,7 +25,7 @@ class WhatsAppClient {
         autoStart: false,
         concurrency: 1,
         interval: 1000, // 1s
-        timeout: 10000, // 10s
+        timeout: 15000, // 15s
     });
     handlerQueue: PQueue = new PQueue({
         concurrency: 5,
