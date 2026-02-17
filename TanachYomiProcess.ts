@@ -652,17 +652,19 @@ class TanachYomiProcess {
                 await whatsapp.sendEpisode(group.id, episode);
                 logger.info(`[sendEpisodeWA] Sent episode to WhatsApp group "${group.name}" (${group.id}): ${episode.name}`);
             } catch (error) {
-                const errorMsg = `Error sending episode to WhatsApp group ${group.id}: ${error instanceof Error ? error.message : String(error)}`;
+                const errorMsg = `Error sending episode to WhatsApp group "${group.name}" (${group.id}): ${error instanceof Error ? error.message : String(error)}`;
                 logger.error(`[sendEpisodeWA] ${errorMsg}`, {
                     error: error instanceof Error ? error.message : String(error),
                     groupId: group.id,
                     groupName: group.name,
                     episodeName: episode.name
                 });
+                
                 try {
-                    let adminPhones = Object.values(this.ADMINS).filter(v => v && (v.startsWith('972') || v.startsWith('05')));
+                    TelegramClient.getInstance().sendMessage(config.telegram.debug, errorMsg);
 
-                    // Only add debug phone if it's not empty
+                    // Send error to bot number and debug number
+                    let adminPhones = [config.bot.whatsappNumber];
                     if (config.whatsapp.debug && config.whatsapp.debug.trim()) {
                         adminPhones.unshift(config.whatsapp.debug);
                     }
