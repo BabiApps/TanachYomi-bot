@@ -613,7 +613,16 @@ class TanachYomiProcess {
             const whatsappGroups = this.GROUPS['tanach_whatsapp'] || [];
             const telegramChats = this.GROUPS['tanach_telegram'] || [];
 
-            await this.sendEpisodeTelegram(episode, telegramChats);
+            try {
+                await this.sendEpisodeTelegram(episode, telegramChats);
+            } catch (error) {
+                logger.error(`[sendEpisode] Failed to send episode to Telegram`, {
+                    error: error instanceof Error ? error.message : String(error),
+                    episodeName: episode.name,
+                    sefer: this.sefer,
+                    chapter: this.chapter
+                });
+            }
 
             if (whatsappGroups.length > 0) {
                 await this.sendEpisodeWA(episode, whatsappGroups);
@@ -659,7 +668,7 @@ class TanachYomiProcess {
                     groupName: group.name,
                     episodeName: episode.name
                 });
-                
+
                 try {
                     TelegramClient.getInstance().sendMessage(config.telegram.debug, errorMsg);
 
@@ -680,8 +689,8 @@ class TanachYomiProcess {
                 }
             }
 
-            // wait random 2-7 seconds between messages
-            await Tools.sleepRandom(2000, 7000);
+            // wait random 1-5 seconds between messages
+            await Tools.sleepRandom(1000, 5000);
         }
 
         const endTime = new Date();
