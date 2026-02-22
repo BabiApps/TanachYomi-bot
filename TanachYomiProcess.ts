@@ -210,8 +210,8 @@ class TanachYomiProcess {
 
     /** Adjust current sefer and chapter if out of bounds */
     fixCurrentEpisode() {
-        // end of sefer - check if next chapter exists
-        if (this.BIBLE[this.sefer][this.chapter + 1] === undefined) {
+        // end of sefer - check if the chapter exists
+        if (this.BIBLE[this.sefer][this.chapter] === undefined) {
             // move to next sefer
             let index = this.BIBLE.order.indexOf(this.sefer);
 
