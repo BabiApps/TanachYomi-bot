@@ -174,9 +174,6 @@ class TanachYomiProcess {
             const nextEpisode = this.addDay();
             logger.info(`[sendTanachYomi] Moved to next: ${this.sefer}:${this.chapter} - ${nextEpisode.name}`);
 
-            // Save state
-            this.saveState();
-
             // Send to all users
             await this.sendEpisode(currentEpisode);
         }
@@ -231,7 +228,6 @@ class TanachYomiProcess {
 
             // chapters start from 1
             this.chapter = 1;
-            this.saveState();
         }
     }
 
@@ -256,7 +252,7 @@ class TanachYomiProcess {
         logger.info(`Set current episode to: ${ep.name}`);
         return ep;
     }
-
+    
     addDay(): TanachYomiEpisode {
         try {
             this.chapter += 1;
@@ -267,6 +263,7 @@ class TanachYomiProcess {
                 chapter: this.chapter,
                 episodeName: ep.name
             });
+            this.saveState();
             return ep;
         } catch (error) {
             logger.error(`[addDay] Failed to advance day from ${this.sefer}:${this.chapter - 1}`, {
