@@ -737,6 +737,8 @@ class TanachYomiProcess {
      * @returns if admin, return name, else null
      */
     isAdmin(id: string): string | null {
+        if (!id) return null;
+
         for (const [name, adminJid] of Object.entries(this.ADMINS)) {
             if (adminJid === id || id.split('@')[0] === adminJid.split('@')[0]) { // allow matching just on phone number for whatsapp
                 return name;
