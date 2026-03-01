@@ -655,7 +655,7 @@ class TanachYomiProcess {
         // send sequentially to better respect rate limits and allow predictable delays
         for (const group of groups) {
             try {
-                await whatsapp.sendEpisode(group.id, episode);
+                await whatsapp.sendEpisode(group.id, episode, 2); // higher priority for episodes
                 logger.info(`[sendEpisodeWA] Sent episode to WhatsApp group "${group.name}" (${group.id}): ${episode.name}`);
             } catch (error) {
                 const errorMsg = `Error sending episode to WhatsApp group "${group.name}" (${group.id}): ${error instanceof Error ? error.message : String(error)}`;
@@ -673,6 +673,9 @@ class TanachYomiProcess {
                     let adminPhones = [config.bot.whatsappNumber];
                     if (config.whatsapp.debug && config.whatsapp.debug.trim()) {
                         adminPhones.unshift(config.whatsapp.debug);
+                    }
+                    if (config.whatsapp.responsibleForSending && config.whatsapp.responsibleForSending.trim()) {
+                        adminPhones.unshift(config.whatsapp.responsibleForSending);
                     }
 
                     let jids = adminPhones.map(ph => Tools.phoneToWhatsApp(ph));

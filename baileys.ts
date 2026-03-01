@@ -25,7 +25,7 @@ class WhatsAppClient {
         autoStart: false,
         concurrency: 1,
         interval: 1000, // 1s
-        timeout: 15000, // 15s
+        timeout: 25000, // 25s
     });
     handlerQueue: PQueue = new PQueue({
         concurrency: 5,
@@ -250,10 +250,16 @@ class WhatsAppClient {
         return this.msgQueue.add(async () => await this.sock?.sendMessage(jid, content, options));
     }
 
-    async sendEpisode(jid: string, episode: TanachYomiEpisode) {
+    async sendEpisode(jid: string, episode: TanachYomiEpisode, priority: number = 1) {
         const filePath = await Downloader.download(episode);
-        await this.sendMsg(jid, { audio: { url: filePath }, mimetype: 'audio/mpeg' });
-        return this.sendMsg(jid, { text: episode.name });
+        this.msgQueue.add(async () =>
+            await this.sock?.sendMessage(jid, { audio: { url: filePath }, mimetype: 'audio/mpeg' }),
+            { priority }
+        );
+        this.msgQueue.add(async () =>
+            await this.sock?.sendMessage(jid, { text: episode.name }),
+            { priority }
+        );
     }
 
     /**

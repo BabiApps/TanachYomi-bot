@@ -31,6 +31,7 @@ export const config = {
     // WhatsApp settings
     whatsapp: {
         debug: process.env.WHATSAPP_DEBUG,
+        responsibleForSending: process.env.WHATSAPP_RESPONSIBLE,
         name: 'TanachYomiBot',
     },
 
