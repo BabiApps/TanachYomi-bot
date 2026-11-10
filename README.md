@@ -61,6 +61,25 @@ npm run build
 
 This generates JavaScript files in the working directory.
 
+### Download all Tanach episodes
+
+To download missing audio from the SoundCloud URLs in `saved_files/BIBLE_EPISODES.json`, convert it to tagged MP3, and update each episode's `path`:
+
+```bash
+npm run download:all
+```
+
+The script downloads up to three episodes at a time. To use two concurrent downloads:
+
+```bash
+npm run download:all -- --concurrency=2
+```
+
+Downloads try MP3 first, then SoundCloud's MP4/AAC format if MP3 is unavailable. Temporary failures are retried up to three times. Audio downloaded in either source format (and previously cached files in another format) is converted locally to MP3 with FFmpeg and tagged with the episode title and artist using ID3.
+The bundled FFmpeg binary is GPL-3.0-or-later; review its license before redistributing the application with dependencies.
+
+Only run bulk downloads when you have permission to save the recordings.
+
 ## Deployment
 
 For 24/7 operation on a Linux server:

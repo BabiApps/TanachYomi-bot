@@ -31,7 +31,7 @@ export default async function handleMessage(msg: WAMessage) {
     }
 
     // continue existing dialog
-    if (OpenedDialogs.has(jid)) return handleOpenedDialog(jid, textMsg);
+    if (OpenedDialogs.has(jid)) return handleOpenedDialog(jid, textMsg, msg.key);
 
 
     // ADMIN COMMANDS
@@ -227,7 +227,7 @@ export default async function handleMessage(msg: WAMessage) {
         }
 
         if (results.length === 1) {
-            return await whatsapp.sendEpisode(jid, results[0]);
+            return await whatsapp.sendEpisode(jid, results[0], 1, msg.key);
         }
 
         if (results.length > 10) {
@@ -287,12 +287,12 @@ export default async function handleMessage(msg: WAMessage) {
     if (textMsg.length > 0) {
         const results = TanachYomiProcess.getInstance().searchEpisodeByText(textMsg);
         if (results.length === 1) {
-            return await whatsapp.sendEpisode(jid, results[0]);
+            return await whatsapp.sendEpisode(jid, results[0], 1, msg.key);
         }
     }
 }
 
-async function handleOpenedDialog(jid: string, textMsg: string) {
+async function handleOpenedDialog(jid: string, textMsg: string, progressKey?: WAMessage['key']) {
     const dialog = OpenedDialogs.get(jid);
     if (!dialog) return;
 
@@ -375,7 +375,7 @@ async function handleOpenedDialog(jid: string, textMsg: string) {
             const ep = results[choice - 1];
             OpenedDialogs.delete(jid);
 
-            return await whatsapp.sendEpisode(jid, ep);
+            return await whatsapp.sendEpisode(jid, ep, 1, progressKey);
         }
 
         default:

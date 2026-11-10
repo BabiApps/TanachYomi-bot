@@ -547,59 +547,55 @@ class TanachYomiProcess {
         }
     }
 
-    updateEpisodePath(episode: TanachYomiEpisode, path: string) {
-        try {
-            const bible = JSON.parse(fs.readFileSync(this.BiblePath, 'utf-8')) as BibleType;
+    updateEpisodePath(episode: Pick<TanachYomiEpisode, 'name' | 'chapter'>, path: string) {
+        const bible = JSON.parse(fs.readFileSync(this.BiblePath, 'utf-8')) as BibleType;
 
-            // Find the correct sefer by searching through all sfarim
-            let found = false;
-            for (const sefer in bible) {
-                if (sefer === 'order') continue; // skip the order array
-                const seferEpisodes = bible[sefer];
+        // Find the correct sefer by searching through all sfarim
+        let found = false;
+        for (const sefer in bible) {
+            if (sefer === 'order') continue; // skip the order array
+            const seferEpisodes = bible[sefer];
 
-                for (const chapterKey in seferEpisodes) {
-                    const ep = seferEpisodes[chapterKey];
-                    if (ep.name === episode.name && ep.chapter === episode.chapter) {
-                        ep.path = path;
-                        found = true;
-                        break;
-                    }
+            for (const chapterKey in seferEpisodes) {
+                const ep = seferEpisodes[chapterKey];
+                if (ep.name === episode.name && ep.chapter === episode.chapter) {
+                    ep.path = path;
+                    found = true;
+                    break;
                 }
-
-                if (found) break;
             }
 
-            if (!found) {
-                logger.warn(`[updateEpisodePath] Episode not found in Bible: ${episode.name}:${episode.chapter}`);
-            }
-
-            // write bible file atomically
-            this.writeAtomic(this.BiblePath, JSON.stringify(bible, null, 2));
-            logger.info(`[updateEpisodePath] Updated path for ${episode.name}:${episode.chapter} to: ${path}`);
-        } catch (error) {
-            logger.error(`[updateEpisodePath] Failed to update episode path for ${episode.name}:${episode.chapter}`, {
-                error: error instanceof Error ? error.message : String(error),
-                episodeName: episode.name,
-                chapter: episode.chapter,
-                newPath: path
-            });
+            if (found) break;
         }
+
+        if (!found) {
+            throw new Error(`Episode not found in Bible: ${episode.name}:${episode.chapter}`);
+        }
+
+        // write bible file atomically
+        this.writeAtomic(this.BiblePath, JSON.stringify(bible, null, 2));
     }
 
     /**
      * Write file atomically: write to temp and rename.
      */
     private writeAtomic(filePath: string, data: string) {
+        const tmp = `${filePath}.tmp-${process.pid}-${Date.now()}`;
         try {
             const dir = path.dirname(filePath);
             if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-            const tmp = `${filePath}.tmp-${process.pid}-${Date.now()}`;
             fs.writeFileSync(tmp, data, { encoding: 'utf8' });
             fs.renameSync(tmp, filePath);
         } catch (err) {
-            logger.error('[writeAtomic] Failed to write file atomically', { filePath, error: err instanceof Error ? err.message : String(err) });
-            // fallback to direct write
-            fs.writeFileSync(filePath, data, { encoding: 'utf8' });
+            try {
+                if (fs.existsSync(tmp)) fs.unlinkSync(tmp);
+            } catch (cleanupError) {
+                logger.warn('[writeAtomic] Failed to remove temporary file', {
+                    filePath: tmp,
+                    error: cleanupError instanceof Error ? cleanupError.message : String(cleanupError)
+                });
+            }
+            throw err;
         }
     }
 

@@ -1,4 +1,4 @@
-import makeWASocket, { MiscMessageGenerationOptions, AnyMessageContent, DisconnectReason, fetchLatestBaileysVersion, WAMessage } from '@adiwajshing/baileys';
+import makeWASocket, { MiscMessageGenerationOptions, AnyMessageContent, DisconnectReason, fetchLatestBaileysVersion, WAMessage, WAMessageKey } from '@adiwajshing/baileys';
 import { proto } from '@adiwajshing/baileys/WAProto/index.js';
 import QRCode from 'qrcode';
 import PQueue from 'p-queue';
@@ -250,8 +250,22 @@ class WhatsAppClient {
         return this.msgQueue.add(async () => await this.sock?.sendMessage(jid, content, options));
     }
 
-    async sendEpisode(jid: string, episode: TanachYomiEpisode, priority: number = 1) {
-        const filePath = await Downloader.download(episode);
+    async sendEpisode(jid: string, episode: TanachYomiEpisode, priority: number = 1, progressKey?: WAMessageKey) {
+        if (progressKey) {
+            await this.sendMsg(jid, { react: { text: '⏳', key: progressKey } })
+                .catch(error => logger.warn(`[WhatsAppClient.sendEpisode] Failed to show download progress for "${episode.name}"`, {
+                    error: error instanceof Error ? error.message : String(error)
+                }));
+        }
+
+        const filePath = await Downloader.download(episode).finally(() => {
+            if (!progressKey) return;
+            return this.sendMsg(jid, { react: { text: '', key: progressKey } })
+                .catch(error => logger.warn(`[WhatsAppClient.sendEpisode] Failed to clear download progress for "${episode.name}"`, {
+                    error: error instanceof Error ? error.message : String(error)
+                }));
+        });
+
         this.msgQueue.add(async () =>
             await this.sock?.sendMessage(jid, { audio: { url: filePath }, mimetype: 'audio/mpeg' }),
             { priority }
@@ -294,6 +308,4 @@ class WhatsAppClient {
 }
 
 export default WhatsAppClient;
-
-
 
